@@ -207,6 +207,10 @@ model estabelecimento {
   data_vencimento_plano                                                        DateTime?                          @db.Date
   plano                                                                        String?                            @db.Uuid
   responsavel                                                                  String?                            @db.Uuid
+  endereco                                                                     String?
+  numero                                                                       String?
+  complemento                                                                  String?
+  ponto_referencia                                                             String?
   tipo_categoria                                                               String?
   alerta_alerta_estabelecimentoToestabelecimento                               alerta[]                           @relation("alerta_estabelecimentoToestabelecimento")
   area_entrega_area_entrega_estabelecimentoToestabelecimento                   area_entrega[]                     @relation("area_entrega_estabelecimentoToestabelecimento")

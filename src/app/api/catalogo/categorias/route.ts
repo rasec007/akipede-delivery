@@ -8,10 +8,18 @@ function serialize(obj: any): any {
 }
 
 // GET - Lista todas as categorias com produtos, complementos e itens
-export async function GET() {
+export async function GET(req: NextRequest) {
   try {
-    const { tenantId } = getAuthContext();
-    if (!tenantId) return NextResponse.json({ error: "Não autorizado" }, { status: 401 });
+    const { tenantId: authTenantId } = getAuthContext();
+    const { searchParams } = new URL(req.url);
+    const queryTenantId = searchParams.get("tenantId");
+
+    // Usa o tenantId do contexto (logado) ou da query (público)
+    const tenantId = authTenantId || queryTenantId;
+
+    if (!tenantId) {
+      return NextResponse.json({ error: "Não autorizado ou Tenant ID ausente" }, { status: 401 });
+    }
 
     const service = new CatalogoService(tenantId);
     const categorias = await service.listCategorias();

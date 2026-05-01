@@ -55,15 +55,21 @@ export function Navbar() {
   const router = useRouter();
   const [showLogoutModal, setShowLogoutModal] = useState(false);
 
-  const handleLogout = () => {
-    // Limpa LocalStorage
-    localStorage.removeItem("accessToken");
-    
-    // Limpa Cookie (importante para o Middleware)
-    document.cookie = "accessToken=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
-    
-    // Redireciona
-    window.location.href = "/auth/login";
+  const handleLogout = async () => {
+    try {
+      // 1. Chama a API de logout no servidor para apagar os cookies HttpOnly
+      await fetch("/api/auth/logout", { method: "POST" });
+      
+      // 2. Limpa LocalStorage (client side)
+      localStorage.clear();
+      
+      // 3. Redireciona com Refresh total
+      window.location.href = "/auth/login";
+    } catch (error) {
+      console.error("Erro ao deslogar:", error);
+      // Fallback em caso de erro na rede
+      window.location.href = "/auth/login";
+    }
   };
 
   return (

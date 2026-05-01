@@ -54,11 +54,13 @@ export class PublicCatalogoService {
     // Verifica status de funcionamento
     const horarioService = new HorarioService(est.id_estabelecimento);
     const status = await horarioService.checkAberto();
+    const horarios = await horarioService.listHorarios();
 
     return {
       estabelecimento: est,
       categorias,
-      status
+      status,
+      horarios
     };
   }
 }

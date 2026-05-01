@@ -48,15 +48,26 @@ export async function PUT(req: NextRequest) {
     if (!tenantId) return NextResponse.json({ error: "Não autorizado" }, { status: 401 });
 
     const body = await req.json();
+    console.log("📥 API HORARIOS - RECEBIDO PARA UPDATE:", body);
+    
     const { id, diaSemana, horaAbre, horaFecha } = body;
 
-    if (!id) return NextResponse.json({ error: "ID obrigatório" }, { status: 400 });
+    if (!id) {
+      console.error("❌ ERRO: ID do horário não fornecido.");
+      return NextResponse.json({ error: "ID obrigatório" }, { status: 400 });
+    }
 
     const service = new HorarioService(tenantId);
     const horario = await service.updateHorario(id, { diaSemana, horaAbre, horaFecha });
+    
+    console.log("✅ API HORARIOS - UPDATE SUCESSO");
     return NextResponse.json(serialize(horario));
   } catch (error: any) {
-    return NextResponse.json({ error: error.message }, { status: 500 });
+    console.error("🔥 ERRO CRÍTICO NO PUT /api/horarios:", error);
+    return NextResponse.json({ 
+      error: "Erro ao atualizar horário", 
+      details: error.message 
+    }, { status: 500 });
   }
 }
 

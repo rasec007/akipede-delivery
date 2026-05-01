@@ -3,10 +3,12 @@ import type { NextRequest } from "next/server";
 import { verifyAccessToken } from "@/lib/auth";
 
 // Rotas que não precisam de autenticação
-const publicRoutes = ["/api/auth/login", "/api/auth/register", "/api/auth/recovery", "/api/dominios", "/api/estabelecimentos/check-apelido", "/api/public"];
+const publicRoutes = ["/api/auth/login", "/api/auth/register", "/api/auth/recovery", "/api/dominios", "/api/estabelecimentos/check-apelido", "/api/public", "/api/catalogo/publico", "/catalogo"];
 
 export async function middleware(req: NextRequest) {
   const { pathname } = req.nextUrl;
+
+  console.log(`🛡️ MIDDLEWARE: Verificando acesso para: ${pathname}`);
 
   // 1. Pular validação para rotas públicas
   if (publicRoutes.some((route) => pathname.startsWith(route))) {
@@ -63,12 +65,15 @@ export async function middleware(req: NextRequest) {
 export const config = {
   matcher: [
     "/api/:path*", 
-    "/dashboard/:path*",
-    "/produtos/:path*",
-    "/horarios/:path*",
-    "/pagamentos/:path*",
-    "/cupons/:path*",
-    "/pedidos/:path*",
-    "/settings/:path*"
+    "/dashboard", "/dashboard/:path*",
+    "/produtos", "/produtos/:path*",
+    "/pedidos", "/pedidos/:path*",
+    "/usuarios", "/usuarios/:path*",
+    "/logistica", "/logistica/:path*",
+    "/chat", "/chat/:path*",
+    "/settings", "/settings/:path*",
+    "/horarios", "/horarios/:path*",
+    "/pagamentos", "/pagamentos/:path*",
+    "/cupons", "/cupons/:path*"
   ],
 };

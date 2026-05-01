@@ -6,8 +6,8 @@ import { Mail, Lock, Loader2, ArrowRight, Eye, EyeOff } from "lucide-react";
 import { motion } from "framer-motion";
 
 export default function LoginPage() {
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
+  const [email, setEmail] = useState("rasec007+delivery@gmail.com");
+  const [password, setPassword] = useState("Rasec007k9.,.,");
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");

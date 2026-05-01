@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect, useCallback } from "react";
 import { useRouter } from "next/navigation";
-import { Plus, ChevronDown, ChevronRight, Edit2, Trash2, ShoppingBag, Loader2, Package, Layers, Truck, UtensilsCrossed } from "lucide-react";
+import { Plus, ChevronDown, ChevronRight, Edit2, Trash2, ShoppingBag, Loader2, Package, Layers, Truck, UtensilsCrossed, Image as ImageIcon } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { toast } from "react-hot-toast";
 import { ModalCategoria, ModalProduto, ModalComplemento, ModalItem } from "@/client/components/catalogo/CatalogoModals";
@@ -39,8 +39,6 @@ export default function ProdutosPage() {
   const toggleCat = (id: string) => { setExpandedCats(prev => { const n = new Set(prev); n.has(id) ? n.delete(id) : n.add(id); return n; }); };
   const toggleProd = (id: string) => { setExpandedProds(prev => { const n = new Set(prev); n.has(id) ? n.delete(id) : n.add(id); return n; }); };
 
-  // ── CRUD Handlers ──
-  // Handler centralizado de erros da API
   const handleApiError = async (res: Response) => {
     if (res.status === 401) {
       toast.error("Sessão expirada. Faça login novamente.");
@@ -110,140 +108,166 @@ export default function ProdutosPage() {
   if (loading) return <div className="flex items-center justify-center py-32"><Loader2 className="w-8 h-8 text-blue-400 animate-spin" /></div>;
 
   return (
-    <div className="space-y-6">
-      {/* Header */}
-      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
-        <div>
-          <h2 className="text-3xl font-bold text-white">Meus Produtos</h2>
-          <p className="text-white/40">Gerencie seu cardápio com categorias, produtos, complementos e itens.</p>
+    <div className="space-y-6 max-w-7xl mx-auto pb-24 px-4">
+      {/* Header Proporcional */}
+      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 glass p-6 rounded-[32px] border border-white/10 shadow-xl relative overflow-hidden group">
+        <div className="relative z-10">
+          <h2 className="text-2xl font-bold text-white tracking-tight">Meus <span className="text-blue-400 font-semibold">Produtos</span></h2>
+          <p className="text-white/40 text-sm mt-0.5">Gerencie o catálogo do seu estabelecimento.</p>
         </div>
-        <button onClick={() => setModalCat({ open: true, edit: null })}
-          className="bg-blue-600 hover:bg-blue-500 text-white px-6 py-3 rounded-2xl font-bold flex items-center gap-2 transition-all shadow-[0_0_20px_rgba(37,99,235,0.3)]">
-          <Plus className="w-5 h-5" /> Categoria
-        </button>
+        <div className="relative z-10">
+          <button onClick={() => setModalCat({ open: true, edit: null })}
+            className="bg-gradient-to-br from-[#415CC1] to-[#304699] hover:opacity-90 active:scale-95 text-white px-6 py-2.5 rounded-xl font-bold flex items-center gap-2 transition-all text-xs border border-white/10 shadow-lg shadow-blue-900/20">
+            <Layers className="w-4 h-4" /> Nova Categoria
+          </button>
+        </div>
       </div>
 
-      {/* Empty State */}
-      {categorias.length === 0 && (
-        <div className="flex flex-col items-center justify-center py-20 glass rounded-3xl border-2 border-dashed border-white/5">
-          <Package className="w-12 h-12 text-white/10 mb-4" />
-          <p className="text-white/20">Nenhuma categoria cadastrada. Comece criando uma!</p>
-        </div>
-      )}
-
-      {/* Accordion Hierárquico */}
-      {categorias.map(cat => (
-        <div key={cat.id_categoria} className="glass rounded-2xl border border-white/5 overflow-hidden">
-          {/* CATEGORIA HEADER */}
-          <div className="flex items-center justify-between px-6 py-4 cursor-pointer hover:bg-white/5 transition-colors" onClick={() => toggleCat(cat.id_categoria)}>
-            <div className="flex items-center gap-3">
-              {expandedCats.has(cat.id_categoria) ? <ChevronDown className="w-5 h-5 text-blue-400" /> : <ChevronRight className="w-5 h-5 text-white/30" />}
-              <Layers className="w-5 h-5 text-blue-400" />
-              <span className="text-lg font-bold text-white">{cat.nome}</span>
-              <span className="text-xs text-white/30 bg-white/5 px-2 py-0.5 rounded-lg">{cat.produto_produto_categoriaTocategoria.length} produtos</span>
+      <div className="space-y-4">
+        {categorias.map(cat => (
+          <div key={cat.id_categoria} className="glass rounded-[32px] border border-white/5 overflow-hidden shadow-lg transition-all duration-300">
+            {/* CATEGORIA HEADER */}
+            <div className="flex items-center justify-between px-8 py-4 cursor-pointer hover:bg-white/[0.02] transition-colors group" onClick={() => toggleCat(cat.id_categoria)}>
+              <div className="flex items-center gap-4">
+                <div className="p-2 bg-white/5 rounded-xl hover:bg-blue-600/20 transition-all border border-white/5" onClick={(e) => { e.stopPropagation(); setModalCat({ open: true, edit: cat }); }}>
+                  <Edit2 className="w-4 h-4 text-blue-400" />
+                </div>
+                <div>
+                  <span className="text-lg font-bold text-white group-hover:text-blue-400 transition-colors">{cat.nome}</span>
+                  <span className="ml-3 text-[10px] font-bold text-white/20 uppercase tracking-widest">{cat.produto_produto_categoriaTocategoria.length} Itens</span>
+                </div>
+              </div>
+              <div className="flex items-center gap-4">
+                <button onClick={(e) => { e.stopPropagation(); setModalProd({ open: true, edit: null, catId: cat.id_categoria, catNome: cat.nome }); }}
+                  className="bg-gradient-to-br from-[#FFA500] to-[#E69500] hover:opacity-90 active:scale-95 text-white px-4 py-2 rounded-xl text-[10px] font-bold flex items-center gap-1 border border-white/10">
+                  <Plus className="w-3.5 h-3.5" /> PRODUTO
+                </button>
+                <div className={`transition-transform duration-300 ${expandedCats.has(cat.id_categoria) ? "rotate-180" : ""}`}>
+                  <ChevronDown className="w-5 h-5 text-white/20" />
+                </div>
+              </div>
             </div>
-            <div className="flex items-center gap-2" onClick={e => e.stopPropagation()}>
-              <button onClick={() => setModalProd({ open: true, edit: null, catId: cat.id_categoria, catNome: cat.nome })}
-                className="bg-orange-500 hover:bg-orange-400 text-white px-4 py-2 rounded-xl text-xs font-bold flex items-center gap-1"><Plus className="w-3.5 h-3.5" /> Produto</button>
-              <button onClick={() => setModalCat({ open: true, edit: cat })} className="p-2 text-white/20 hover:text-blue-400"><Edit2 className="w-4 h-4" /></button>
-              <button onClick={() => handleDeleteCategoria(cat.id_categoria)} className="p-2 text-white/20 hover:text-red-400"><Trash2 className="w-4 h-4" /></button>
-            </div>
-          </div>
 
-          {/* PRODUTOS */}
-          <AnimatePresence>
-            {expandedCats.has(cat.id_categoria) && (
-              <motion.div initial={{ height: 0, opacity: 0 }} animate={{ height: "auto", opacity: 1 }} exit={{ height: 0, opacity: 0 }} className="overflow-hidden">
-                {cat.produto_produto_categoriaTocategoria.map(prod => (
-                  <div key={prod.id_produto} className="border-t border-white/5">
-                    {/* PRODUTO HEADER */}
-                    <div className="flex items-center justify-between px-6 py-4 pl-12 cursor-pointer hover:bg-white/[0.03] transition-colors" onClick={() => toggleProd(prod.id_produto)}>
-                      <div className="flex items-center gap-4">
-                        {expandedProds.has(prod.id_produto) ? <ChevronDown className="w-4 h-4 text-orange-400" /> : <ChevronRight className="w-4 h-4 text-white/20" />}
-                        <div className="w-12 h-12 rounded-xl overflow-hidden bg-white/5 flex-shrink-0">
-                          {prod.foto ? <img src={prod.foto} alt="" className="w-full h-full object-cover" />
-                            : <div className="w-full h-full flex items-center justify-center"><ShoppingBag className="w-5 h-5 text-white/10" /></div>}
-                        </div>
-                        <div>
-                          <p className="font-bold text-white">{prod.nome}</p>
-                          <p className="text-xs text-white/30">{prod.descricao || "Sem descrição"}</p>
-                          <div className="flex items-center gap-2 mt-1">
-                            <p className="text-sm font-bold text-green-400">R$ {Number(prod.valor_total || 0).toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</p>
-                            <div className="flex items-center gap-1">
-                              {(prod.visibilidade || "delivery,mesa").includes("delivery") && (
-                                <span className="inline-flex items-center gap-1 text-[10px] font-bold px-2 py-0.5 rounded-lg bg-blue-500/15 text-blue-400 border border-blue-500/20">
-                                  <Truck className="w-3 h-3" /> Delivery
-                                </span>
-                              )}
-                              {(prod.visibilidade || "delivery,mesa").includes("mesa") && (
-                                <span className="inline-flex items-center gap-1 text-[10px] font-bold px-2 py-0.5 rounded-lg bg-amber-500/15 text-amber-400 border border-amber-500/20">
-                                  <UtensilsCrossed className="w-3 h-3" /> Mesa
-                                </span>
-                              )}
+            {/* PRODUTOS */}
+            <AnimatePresence>
+              {expandedCats.has(cat.id_categoria) && (
+                <motion.div initial={{ height: 0, opacity: 0 }} animate={{ height: "auto", opacity: 1 }} exit={{ height: 0, opacity: 0 }} className="overflow-hidden border-t border-white/5 bg-black/20">
+                  {cat.produto_produto_categoriaTocategoria.map(prod => (
+                    <div key={prod.id_produto} className="border-b border-white/5 last:border-b-0">
+                      <div className="flex flex-col md:flex-row items-start md:items-center justify-between px-10 py-6 cursor-pointer hover:bg-white/[0.02] transition-all group/prod" onClick={() => toggleProd(prod.id_produto)}>
+                        <div className="flex items-start gap-6">
+                          <div className="p-2 bg-white/5 rounded-xl hover:bg-orange-600/20 transition-all mt-1 border border-white/5" onClick={(e) => { e.stopPropagation(); setModalProd({ open: true, edit: prod, catId: cat.id_categoria, catNome: cat.nome }); }}>
+                            <Edit2 className="w-4 h-4 text-orange-400" />
+                          </div>
+                          <div className="w-20 h-20 rounded-2xl overflow-hidden bg-white/5 flex-shrink-0 border border-white/10">
+                            {prod.foto ? <img src={prod.foto} alt="" className="w-full h-full object-cover" />
+                              : <div className="w-full h-full flex items-center justify-center"><ShoppingBag className="w-8 h-8 text-white/5" /></div>}
+                          </div>
+                          <div className="space-y-1">
+                            <p className="text-lg font-bold text-white/90">
+                              Produto: <span className="text-blue-400 font-semibold">{prod.nome}</span>
+                            </p>
+                            <p className="text-xs text-white/40 leading-relaxed max-w-lg line-clamp-1">{prod.descricao || "Sem descrição disponível."}</p>
+                            <div className="flex items-center gap-4 mt-2">
+                              <div>
+                                <span className="text-[10px] text-white/20 uppercase tracking-widest block mb-0.5">Valor</span>
+                                <p className="text-base font-bold text-green-400">R$ {Number(prod.valor_total || 0).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</p>
+                              </div>
+                              <div className="h-6 w-px bg-white/10" />
+                              <div>
+                                <span className="text-[10px] text-white/20 uppercase tracking-widest block mb-0.5">Visibilidade</span>
+                                <span className="text-[10px] font-bold text-blue-400 bg-blue-400/10 px-2 py-0.5 rounded-lg border border-blue-400/20">{prod.visibilidade || "Geral"}</span>
+                              </div>
                             </div>
                           </div>
                         </div>
+                        <div className={`transition-transform duration-300 mr-2 ${expandedProds.has(prod.id_produto) ? "rotate-180" : ""}`}>
+                          <ChevronDown className="w-5 h-5 text-white/10" />
+                        </div>
                       </div>
-                      <div className="flex items-center gap-2" onClick={e => e.stopPropagation()}>
-                        <button onClick={() => setModalComp({ open: true, edit: null, prodId: prod.id_produto, prodNome: prod.nome })}
-                          className="bg-emerald-600 hover:bg-emerald-500 text-white px-3 py-1.5 rounded-xl text-xs font-bold flex items-center gap-1"><Plus className="w-3.5 h-3.5" /> Complemento</button>
-                        <button onClick={() => setModalProd({ open: true, edit: prod, catId: cat.id_categoria, catNome: cat.nome })} className="p-2 text-white/20 hover:text-blue-400"><Edit2 className="w-4 h-4" /></button>
-                        <button onClick={() => handleDeleteProduto(prod.id_produto)} className="p-2 text-white/20 hover:text-red-400"><Trash2 className="w-4 h-4" /></button>
-                      </div>
-                    </div>
 
-                    {/* COMPLEMENTOS */}
-                    <AnimatePresence>
-                      {expandedProds.has(prod.id_produto) && prod.complemento_tipo_complemento_tipo_produtoToproduto.length > 0 && (
-                        <motion.div initial={{ height: 0, opacity: 0 }} animate={{ height: "auto", opacity: 1 }} exit={{ height: 0, opacity: 0 }} className="overflow-hidden bg-white/[0.02]">
-                          <div className="px-6 pl-20 py-3">
-                            <p className="text-xs font-bold text-white/30 uppercase mb-3">Complementos</p>
-                            <div className="space-y-3">
+                      {/* COMPLEMENTOS */}
+                      <AnimatePresence>
+                        {expandedProds.has(prod.id_produto) && (
+                          <motion.div initial={{ height: 0, opacity: 0 }} animate={{ height: "auto", opacity: 1 }} exit={{ height: 0, opacity: 0 }} className="overflow-hidden bg-white/[0.01] border-t border-white/5 p-8 pt-4">
+                            <div className="flex justify-between items-center mb-6">
+                              <h4 className="text-[10px] font-bold text-white/20 uppercase tracking-[0.2em]">Complementos</h4>
+                              <button onClick={(e) => { e.stopPropagation(); setModalComp({ open: true, edit: null, prodId: prod.id_produto, prodNome: prod.nome }); }}
+                                className="bg-[#4CAF50] hover:opacity-90 text-white px-4 py-2 rounded-xl text-[10px] font-bold flex items-center gap-2 border border-white/10">
+                                <Plus className="w-3.5 h-3.5" /> COMPLEMENTO
+                              </button>
+                            </div>
+
+                            <div className="space-y-6">
+                              <div className="grid grid-cols-12 gap-6 text-[9px] font-bold text-white/10 uppercase tracking-widest border-b border-white/5 pb-2">
+                                <div className="col-span-5">Tipo</div>
+                                <div className="col-span-7">Itens Disponíveis</div>
+                              </div>
+
                               {prod.complemento_tipo_complemento_tipo_produtoToproduto.map(comp => (
-                                <div key={comp.id_complemento_tipo} className="bg-white/[0.03] rounded-xl p-4 border border-white/5">
-                                  <div className="flex items-center justify-between mb-2">
-                                    <div>
-                                      <span className="font-bold text-white text-sm">{comp.nome}</span>
-                                      <span className="text-xs text-white/30 ml-2">{Number(comp.quantidade_minima) > 0 ? "Obrigatório" : "Opcional"} · Mín: {String(comp.quantidade_minima ?? 0)} - Máx: {String(comp.quantidade_maxima ?? 10)}</span>
+                                <div key={comp.id_complemento_tipo} className="grid grid-cols-12 gap-6 items-start">
+                                  <div className="col-span-5 flex items-start gap-4">
+                                    <div className="p-2 bg-white/5 rounded-xl hover:bg-green-600/20 transition-all border border-white/5" onClick={() => setModalComp({ open: true, edit: comp, prodId: prod.id_produto, prodNome: prod.nome })}>
+                                      <Edit2 className="w-3.5 h-3.5 text-green-400" />
                                     </div>
-                                    <div className="flex items-center gap-1">
-                                      <button onClick={() => setModalItem({ open: true, edit: null, compId: comp.id_complemento_tipo, compNome: comp.nome })}
-                                        className="bg-amber-700 hover:bg-amber-600 text-white px-3 py-1 rounded-lg text-xs font-bold flex items-center gap-1"><Plus className="w-3 h-3" /> Item</button>
-                                      <button onClick={() => setModalComp({ open: true, edit: comp, prodId: prod.id_produto, prodNome: prod.nome })} className="p-1.5 text-white/20 hover:text-blue-400"><Edit2 className="w-3.5 h-3.5" /></button>
-                                      <button onClick={() => handleDeleteComplemento(comp.id_complemento_tipo)} className="p-1.5 text-white/20 hover:text-red-400"><Trash2 className="w-3.5 h-3.5" /></button>
+                                    <div>
+                                      <p className="font-bold text-white/90 text-sm">{comp.nome}</p>
+                                      <div className="flex gap-2 mt-1">
+                                        <span className="text-[9px] font-bold px-2 py-0.5 rounded-md bg-white/5 text-white/30 border border-white/10 uppercase tracking-tighter">
+                                          {Number(comp.quantidade_minima) > 0 ? "Obrigatório" : "Opcional"}
+                                        </span>
+                                        <span className="text-[9px] font-bold px-2 py-0.5 rounded-md bg-white/5 text-white/30 border border-white/10">
+                                          {String(comp.quantidade_minima ?? 0)}-{String(comp.quantidade_maxima ?? 10)}
+                                        </span>
+                                      </div>
                                     </div>
                                   </div>
-                                  {/* ITENS */}
-                                  {comp.complemento_item_complemento_item_complemento_tipoTocomplemento_tipo.length > 0 && (
-                                    <div className="mt-2 space-y-1 pl-4 border-l-2 border-white/5">
+                                  <div className="col-span-7 space-y-4">
+                                    <div className="flex justify-end">
+                                      <button onClick={() => setModalItem({ open: true, edit: null, compId: comp.id_complemento_tipo, compNome: comp.nome })}
+                                        className="bg-[#795548] hover:opacity-90 text-white px-3 py-1.5 rounded-lg text-[9px] font-bold flex items-center gap-1 border border-white/10 uppercase">
+                                        <Plus className="w-3 h-3" /> Adicionar Item
+                                      </button>
+                                    </div>
+                                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                                       {comp.complemento_item_complemento_item_complemento_tipoTocomplemento_tipo.map(item => (
-                                        <div key={item.id_complemento_item} className="flex items-center justify-between py-1.5">
-                                          <div>
-                                            <span className="text-sm text-white/70">{item.nome}</span>
-                                            {item.valor ? <span className="text-xs text-green-400 ml-2">R$ {Number(item.valor).toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span> : null}
+                                        <div key={item.id_complemento_item} className="flex items-center justify-between bg-white/5 p-3 rounded-2xl border border-white/5 hover:border-white/10 transition-all group/item">
+                                          <div className="flex items-center gap-3">
+                                            <div className="p-1.5 bg-white/5 rounded-lg opacity-40 group-hover/item:opacity-100 transition-all border border-white/5" onClick={() => setModalItem({ open: true, edit: item, compId: comp.id_complemento_tipo, compNome: comp.nome })}>
+                                              <Edit2 className="w-3 h-3 text-amber-500" />
+                                            </div>
+                                            <div>
+                                              <p className="text-xs font-bold text-white/80">{item.nome}</p>
+                                              <p className="text-[10px] font-bold text-green-400">R$ {Number(item.valor).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</p>
+                                            </div>
                                           </div>
-                                          <div className="flex items-center gap-1">
-                                            <button onClick={() => setModalItem({ open: true, edit: item, compId: comp.id_complemento_tipo, compNome: comp.nome })} className="p-1 text-white/20 hover:text-blue-400"><Edit2 className="w-3 h-3" /></button>
-                                            <button onClick={() => handleDeleteItem(item.id_complemento_item)} className="p-1 text-white/20 hover:text-red-400"><Trash2 className="w-3 h-3" /></button>
-                                          </div>
+                                          <button onClick={() => handleDeleteItem(item.id_complemento_item)} className="p-1.5 text-white/10 hover:text-red-400 transition-colors">
+                                            <Trash2 className="w-3.5 h-3.5" />
+                                          </button>
                                         </div>
                                       ))}
                                     </div>
-                                  )}
+                                  </div>
                                 </div>
                               ))}
+                              {prod.complemento_tipo_complemento_tipo_produtoToproduto.length === 0 && (
+                                <div className="col-span-12 py-10 flex flex-col items-center justify-center border-2 border-dashed border-white/5 rounded-[32px]">
+                                  <Package className="w-8 h-8 text-white/5 mb-2" />
+                                  <p className="text-xs text-white/20 italic">Nenhum complemento cadastrado.</p>
+                                </div>
+                              )}
                             </div>
-                          </div>
-                        </motion.div>
-                      )}
-                    </AnimatePresence>
-                  </div>
-                ))}
-              </motion.div>
-            )}
-          </AnimatePresence>
-        </div>
-      ))}
+                          </motion.div>
+                        )}
+                      </AnimatePresence>
+                    </div>
+                  ))}
+                </motion.div>
+              )}
+            </AnimatePresence>
+          </div>
+        ))}
+      </div>
 
       {/* MODAIS */}
       <ModalCategoria open={modalCat.open} onClose={() => setModalCat({ open: false, edit: null })} onSave={handleSaveCategoria} editData={modalCat.edit} />

@@ -3,59 +3,52 @@ import { prisma } from "@/lib/prisma";
 
 export async function GET(req: NextRequest) {
   try {
-    const tenantId = req.headers.get("x-tenant-id");
-    const userId = req.headers.get("x-user-id");
+    const rawTenantId = req.headers.get("x-tenant-id");
+    const rawUserId = req.headers.get("x-user-id");
 
-    console.log("DEBUG GET ESTABELECIMENTO:", { tenantId, userId });
+    const tenantId = (rawTenantId && rawTenantId !== "null" && rawTenantId !== "undefined" && rawTenantId !== "") ? rawTenantId.trim() : null;
+    const userId = (rawUserId && rawUserId !== "null" && rawUserId !== "undefined" && rawUserId !== "") ? rawUserId.trim() : null;
 
     if (!tenantId && !userId) {
       return NextResponse.json({ error: "Identificação não encontrada" }, { status: 401 });
     }
 
-    // Tentar buscar pelo ID da loja ou pelo ID do Responsável
+    const orFilter = [];
+    if (userId) orFilter.push({ responsavel: userId });
+    if (tenantId) orFilter.push({ id_estabelecimento: tenantId });
+
+    // Buscar a Loja
     const loja = await prisma.estabelecimento.findFirst({
       where: {
-        OR: [
-          { id_estabelecimento: (tenantId && tenantId !== "null" && tenantId !== "") ? tenantId : undefined },
-          { responsavel: (userId && userId !== "null" && userId !== "") ? userId : undefined }
-        ]
-      },
-      include: {
-        endereco_endereco_vinculoToestabelecimento: {
-          where: { padrao: true },
-          take: 1
-        }
+        OR: orFilter
       }
     });
     
     if (!loja) {
-      console.log(" - Nenhuma loja encontrada para este vínculo.");
       return NextResponse.json({ error: "Estabelecimento não encontrado" }, { status: 404 });
     }
 
-    // FALLBACK DE APELIDO: Se a loja não tiver apelido, busca o do usuário
-    if (!loja.apelido && userId) {
-      const usuario = await prisma.usuario.findUnique({
-        where: { id_usuario: userId },
-        select: { apelido: true }
-      });
-      if (usuario?.apelido) {
-        (loja as any).apelido = usuario.apelido;
-        console.log(" - Usando apelido do usuário como fallback:", usuario.apelido);
-      }
+    // FALLBACK DE APELIDO
+    if (!loja.apelido && userId && userId.length > 10) {
+      try {
+        const usuario = await prisma.usuario.findUnique({
+          where: { id_usuario: userId },
+          select: { apelido: true }
+        });
+        if (usuario?.apelido) {
+          (loja as any).apelido = usuario.apelido;
+        }
+      } catch (err) {}
     }
 
-    console.log(" - Loja carregada com sucesso:", loja.razao_social);
-
-    // Converter BigInt para string para o JSON não quebrar
     const response = JSON.parse(JSON.stringify(loja, (key, value) =>
       typeof value === 'bigint' ? value.toString() : value
     ));
 
     return NextResponse.json(response);
   } catch (error: any) {
-    console.error("ERRO GET ESTABELECIMENTO:", error);
-    return NextResponse.json({ error: error.message }, { status: 500 });
+    console.error(" 🔥 ERRO 500 NA API:", error);
+    return NextResponse.json({ error: "Erro interno no servidor" }, { status: 500 });
   }
 }
 
@@ -69,6 +62,13 @@ export async function PUT(req: NextRequest) {
 
     // Limpar pedido_minimo para garantir que seja apenas números
     const cleanPedidoMinimo = data.pedido_minimo?.toString().replace(/\D/g, "");
+
+    console.log(`🚀 INICIANDO UPDATE PARA LOJA [${tenantId}]`);
+    console.log("📦 DADOS ENVIADOS:", { 
+      razao_social: data.razao_social, 
+      endereco: data.endereco,
+      numero: data.numero 
+    });
 
     try {
       const atualizado = await prisma.estabelecimento.update({
@@ -85,10 +85,15 @@ export async function PUT(req: NextRequest) {
           banner: data.banner,
           pix_tipo: data.pix_tipo,
           pix_chave: data.pix_chave,
-          pix_nome: data.pix_nome
+          pix_nome: data.pix_nome,
+          endereco: data.endereco,
+          numero: data.numero,
+          complemento: data.complemento,
+          ponto_referencia: data.ponto_referencia
         }
       });
       
+      console.log("✅ UPDATE CONCLUÍDO COM SUCESSO NO BANCO!");
       const response = JSON.parse(JSON.stringify(atualizado, (key, value) =>
         typeof value === 'bigint' ? value.toString() : value
       ));

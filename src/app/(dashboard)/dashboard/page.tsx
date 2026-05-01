@@ -14,9 +14,58 @@ export default function DashboardPage() {
   const [status, setStatus] = useState<{ aberto: boolean; mensagem: string } | null>(null);
 
   useEffect(() => {
-    fetch("/api/horarios/status")
+    const checkStatus = (horarios: any[]) => {
+      const now = new Date();
+      const currentMinutes = now.getHours() * 60 + now.getMinutes();
+      const dayMap: Record<number, string> = {
+        0: "Domingo", 1: "Segunda", 2: "Terça",
+        3: "Quarta", 4: "Quinta", 5: "Sexta", 6: "Sábado",
+      };
+      const todayName = dayMap[now.getDay()];
+
+      const todaySchedules = horarios.filter(h => 
+        h.dominio?.nome?.toLowerCase().includes(todayName.toLowerCase())
+      );
+
+      // 1. Verificar se está aberto
+      for (const s of todaySchedules) {
+        const abre = new Date(s.horaAbre);
+        const fecha = new Date(s.horaFecha);
+        const abreMin = abre.getUTCHours() * 60 + abre.getUTCMinutes();
+        const fechaMin = fecha.getUTCHours() * 60 + fecha.getUTCMinutes();
+
+        if (currentMinutes >= abreMin && currentMinutes < fechaMin) {
+          return { aberto: true, mensagem: "Estamos abertos! Bom trabalho." };
+        }
+      }
+
+      // 2. Se fechado, ver se abre hoje ainda
+      const next = todaySchedules
+        .map(s => {
+          const a = new Date(s.horaAbre);
+          return { min: a.getUTCHours() * 60 + a.getUTCMinutes(), label: `${String(a.getUTCHours()).padStart(2, "0")}:${String(a.getUTCMinutes()).padStart(2, "0")}` };
+        })
+        .filter(s => s.min > currentMinutes)
+        .sort((a, b) => a.min - b.min)[0];
+
+      if (next) {
+        const diff = next.min - currentMinutes;
+        const h = Math.floor(diff / 60);
+        const m = diff % 60;
+        const tempo = `${h > 0 ? h + "h " : ""}${m > 0 ? m + "min" : ""}`;
+        return { aberto: false, mensagem: `Fechado. Abre em ${tempo.trim()} (às ${next.label}).` };
+      }
+
+      return { aberto: false, mensagem: "Fechado no momento. Volte em breve!" };
+    };
+
+    fetch("/api/horarios")
       .then(res => res.json())
-      .then(data => setStatus(data))
+      .then(data => {
+        if (Array.isArray(data)) {
+          setStatus(checkStatus(data));
+        }
+      })
       .catch(err => console.error(err));
   }, []);
 
