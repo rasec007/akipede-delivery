@@ -1,8 +1,10 @@
 {
-  "/vitrine/page": "app/vitrine/page.js",
+  "/page": "app/page.js",
   "/catalogo/delivery/[apelido]/page": "app/catalogo/delivery/[apelido]/page.js",
-  "/auth/login/page": "app/auth/login/page.js",
   "/api/catalogo/publico/[apelido]/route": "app/api/catalogo/publico/[apelido]/route.js",
-  "/(dashboard)/dashboard/page": "app/(dashboard)/dashboard/page.js",
-  "/(dashboard)/settings/page": "app/(dashboard)/settings/page.js"
+  "/api/catalogo/categorias/route": "app/api/catalogo/categorias/route.js",
+  "/(dashboard)/settings/page": "app/(dashboard)/settings/page.js",
+  "/(dashboard)/produtos/page": "app/(dashboard)/produtos/page.js",
+  "/(dashboard)/pedidos/page": "app/(dashboard)/pedidos/page.js",
+  "/(dashboard)/logistica/page": "app/(dashboard)/logistica/page.js"
 }
