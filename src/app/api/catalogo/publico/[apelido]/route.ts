@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
 import { PublicCatalogoService } from "@/server/services/PublicCatalogoService";
 
+export const dynamic = "force-dynamic";
+
 // Converte BigInt para Number para serialização JSON
 function serialize(obj: any): any {
   return JSON.parse(JSON.stringify(obj, (_, v) => typeof v === "bigint" ? Number(v) : v));

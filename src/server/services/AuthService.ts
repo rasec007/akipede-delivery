@@ -117,7 +117,7 @@ export class AuthService {
         apelido: data.apelido,
         senha: hashedParams,
         estabelecimento: establishmentId,
-        adm: true,
+        adm: !!establishmentId, // Só é ADM se tiver estabelecimento (Lojista)
       }
     });
 

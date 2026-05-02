@@ -78,12 +78,23 @@ export function ModalProduto({ open, onClose, onSave, editData, categoriaNome }:
 
   const handleSave = () => {
     const errs: string[] = [];
+    const valNum = parseBRL(valor);
+    const hasItems = (editData?.complemento_tipo_complemento_tipo_produtoToproduto?.length > 0 && 
+                      editData.complemento_tipo_complemento_tipo_produtoToproduto.some((c: any) => 
+                        c.complemento_item_complemento_item_complemento_tipoTocomplemento_tipo?.length > 0
+                      ));
+
     if (!nome.trim()) errs.push("O nome do produto é obrigatório.");
-    if (!valor.trim() || parseBRL(valor) <= 0) errs.push("O valor do produto é obrigatório e deve ser maior que zero.");
+    
+    // Regra: Pode ser zero se já tiver itens (complementos) cadastrados
+    if (valNum <= 0 && !hasItems) {
+      errs.push("O valor do produto deve ser maior que zero ou possuir itens cadastrados.");
+    }
+
     if (!foto) errs.push("A foto do produto é obrigatória.");
     if (errs.length > 0) { setErrors(errs); return; }
     setErrors([]);
-    onSave({ id: editData?.id_produto, nome, descricao, valor: parseBRL(valor), foto, visibilidade });
+    onSave({ id: editData?.id_produto, nome, descricao, valor: valNum, foto, visibilidade });
   };
 
   if (!open) return null;
@@ -223,7 +234,7 @@ export function ModalItem({ open, onClose, onSave, editData, complementoNome }: 
   const handleSave = () => {
     const errs: string[] = [];
     if (!nome.trim()) errs.push("O nome do item é obrigatório.");
-    if (!valor.trim() || parseBRL(valor) <= 0) errs.push("O valor do item é obrigatório e deve ser maior que zero.");
+    if (!valor.trim()) errs.push("O valor do item é obrigatório.");
     if (errs.length > 0) { setErrors(errs); return; }
     setErrors([]);
     onSave({ id: editData?.id_complemento_item, nome, descricao, valor: parseBRL(valor) });

@@ -171,7 +171,9 @@ export default function ProdutosPage() {
                             <div className="flex items-center gap-4 mt-2">
                               <div>
                                 <span className="text-[10px] text-white/20 uppercase tracking-widest block mb-0.5">Valor</span>
-                                <p className="text-base font-bold text-green-400">R$ {Number(prod.valor_total || 0).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</p>
+                                <p className={`text-base font-bold ${Number(prod.valor_total || 0) > 0 ? "text-green-400" : "text-white/60"}`}>
+                                  R$ {Number(prod.valor_total || 0).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
+                                </p>
                               </div>
                               <div className="h-6 w-px bg-white/10" />
                               <div>
@@ -238,7 +240,9 @@ export default function ProdutosPage() {
                                             </div>
                                             <div>
                                               <p className="text-xs font-bold text-white/80">{item.nome}</p>
-                                              <p className="text-[10px] font-bold text-green-400">R$ {Number(item.valor).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</p>
+                                              <p className={`text-[10px] font-bold ${Number(item.valor) > 0 ? "text-green-400" : "text-white/40"}`}>
+                                                R$ {Number(item.valor).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
+                                              </p>
                                             </div>
                                           </div>
                                           <button onClick={() => handleDeleteItem(item.id_complemento_item)} className="p-1.5 text-white/10 hover:text-red-400 transition-colors">

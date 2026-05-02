@@ -295,6 +295,96 @@ function IdentidadeSettings({ formData, handleUpload }: any) {
           <p className="text-white/20 text-xs">Recomendado: 1920x600px (Imagens horizontais)</p>
         </div>
       </div>
+
+      {/* Catálogos e QR Codes */}
+      <div className="space-y-6 pt-6 border-t border-white/10">
+        <div className="flex items-center gap-3">
+          <QrCode className="w-5 h-5 text-blue-400" />
+          <h4 className="text-white font-bold">Catálogos e QR Codes</h4>
+        </div>
+        
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          {/* Delivery */}
+          <div className="bg-white/5 border border-white/10 rounded-[24px] p-6 space-y-4">
+            <div className="flex items-center justify-center">
+              <span className="text-white font-bold text-lg">Catálogo Delivery</span>
+            </div>
+            <div className="flex justify-center bg-white p-4 rounded-2xl w-40 h-40 mx-auto">
+              {formData.apelido ? (
+                <img src={`https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=${encodeURIComponent(typeof window !== 'undefined' ? `${window.location.origin}/catalogo/delivery/${formData.apelido}` : '')}`} alt="QR Code Delivery" className="w-full h-full object-contain" />
+              ) : (
+                <div className="w-full h-full flex items-center justify-center text-gray-400 text-xs text-center">Defina o apelido da loja no Perfil</div>
+              )}
+            </div>
+            <div className="space-y-3 pt-2">
+              <button 
+                onClick={() => {
+                  const url = `https://api.qrserver.com/v1/create-qr-code/?size=500x500&data=${encodeURIComponent(typeof window !== 'undefined' ? `${window.location.origin}/catalogo/delivery/${formData.apelido}` : '')}`;
+                  fetch(url).then(res => res.blob()).then(blob => {
+                    const a = document.createElement("a");
+                    a.href = URL.createObjectURL(blob);
+                    a.download = `qrcode-delivery-${formData.apelido}.png`;
+                    a.click();
+                  });
+                }}
+                disabled={!formData.apelido}
+                className="w-full py-3 bg-white/5 hover:bg-white/10 border border-white/10 rounded-xl text-white text-sm font-bold flex items-center justify-center gap-2 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                <Download className="w-4 h-4" /> Baixar QR Code
+              </button>
+              
+              <a 
+                href={`/catalogo/delivery/${formData.apelido}`} 
+                target="_blank" 
+                rel="noreferrer" 
+                className={`w-full py-3 bg-blue-600 hover:bg-blue-500 rounded-xl text-white text-sm font-bold flex items-center justify-center gap-2 transition-all shadow-lg shadow-blue-600/20 ${!formData.apelido ? 'opacity-50 pointer-events-none' : ''}`}
+              >
+                <ExternalLink className="w-4 h-4" /> Acessar Catálogo Delivery
+              </a>
+            </div>
+          </div>
+
+          {/* Mesa */}
+          <div className="bg-white/5 border border-white/10 rounded-[24px] p-6 space-y-4">
+            <div className="flex items-center justify-center">
+              <span className="text-white font-bold text-lg">Catálogo de Mesa</span>
+            </div>
+            <div className="flex justify-center bg-white p-4 rounded-2xl w-40 h-40 mx-auto">
+              {formData.apelido ? (
+                <img src={`https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=${encodeURIComponent(typeof window !== 'undefined' ? `${window.location.origin}/catalogo/mesa/${formData.apelido}` : '')}`} alt="QR Code Mesa" className="w-full h-full object-contain" />
+              ) : (
+                <div className="w-full h-full flex items-center justify-center text-gray-400 text-xs text-center">Defina o apelido da loja no Perfil</div>
+              )}
+            </div>
+            <div className="space-y-3 pt-2">
+              <button 
+                onClick={() => {
+                  const url = `https://api.qrserver.com/v1/create-qr-code/?size=500x500&data=${encodeURIComponent(typeof window !== 'undefined' ? `${window.location.origin}/catalogo/mesa/${formData.apelido}` : '')}`;
+                  fetch(url).then(res => res.blob()).then(blob => {
+                    const a = document.createElement("a");
+                    a.href = URL.createObjectURL(blob);
+                    a.download = `qrcode-mesa-${formData.apelido}.png`;
+                    a.click();
+                  });
+                }}
+                disabled={!formData.apelido}
+                className="w-full py-3 bg-white/5 hover:bg-white/10 border border-white/10 rounded-xl text-white text-sm font-bold flex items-center justify-center gap-2 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                <Download className="w-4 h-4" /> Baixar QR Code
+              </button>
+              
+              <a 
+                href={`/catalogo/mesa/${formData.apelido}`} 
+                target="_blank" 
+                rel="noreferrer" 
+                className={`w-full py-3 bg-blue-600 hover:bg-blue-500 rounded-xl text-white text-sm font-bold flex items-center justify-center gap-2 transition-all shadow-lg shadow-blue-600/20 ${!formData.apelido ? 'opacity-50 pointer-events-none' : ''}`}
+              >
+                <ExternalLink className="w-4 h-4" /> Acessar Catálogo de Mesa
+              </a>
+            </div>
+          </div>
+        </div>
+      </div>
     </motion.div>
   );
 }
@@ -618,15 +708,23 @@ function PagamentosSettings({ formData, setFormData }: any) {
 // --- CUPONS ---
 function CuponsSettings() {
   const [cupons, setCupons] = useState<any[]>([]);
+  const [tiposCupom, setTiposCupom] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [modalOpen, setModalOpen] = useState(false);
+  const [editData, setEditData] = useState<any>(null);
   const [confirmDelete, setConfirmDelete] = useState<string | null>(null);
 
   const fetchCupons = async () => {
     try {
-      const res = await fetch("/api/cupons");
-      const data = await res.json();
-      if (Array.isArray(data)) setCupons(data);
+      const [resCupons, resTipos] = await Promise.all([
+        fetch("/api/cupons"),
+        fetch(`/api/dominios?tipo=${encodeURIComponent("Tipo de Cupom")}`)
+      ]);
+      const dataCupons = await resCupons.json();
+      const dataTipos = await resTipos.json();
+      
+      if (Array.isArray(dataCupons)) setCupons(dataCupons);
+      if (Array.isArray(dataTipos)) setTiposCupom(dataTipos);
     } catch (err) { console.error(err); }
     finally { setLoading(false); }
   };
@@ -643,33 +741,91 @@ function CuponsSettings() {
     <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="space-y-6">
       <div className="flex justify-between items-center">
         <h3 className="text-xl font-bold text-white">Cupons de Desconto</h3>
-        <button onClick={() => setModalOpen(true)} className="bg-blue-600 hover:bg-blue-500 text-white px-5 py-2.5 rounded-xl text-sm font-bold flex items-center gap-2 shadow-lg shadow-blue-600/20 transition-all">
+        <button onClick={() => { setEditData(null); setModalOpen(true); }} className="bg-blue-600 hover:bg-blue-500 text-white px-5 py-2.5 rounded-xl text-sm font-bold flex items-center gap-2 shadow-lg shadow-blue-600/20 transition-all">
           <Plus className="w-4 h-4" /> Novo Cupom
         </button>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-        {cupons.map((c) => (
-          <div key={c.id_cupom} className="glass rounded-2xl border border-white/5 p-6 relative overflow-hidden group">
-            <div className="absolute top-0 right-0 w-24 h-24 bg-blue-600/5 rounded-full blur-2xl -mr-12 -mt-12 group-hover:bg-blue-600/10 transition-all" />
-            <div className="flex items-center gap-4 mb-4">
-              <div className="w-12 h-12 rounded-2xl bg-blue-600/10 flex items-center justify-center text-blue-400">
-                <Ticket className="w-6 h-6" />
+        <AnimatePresence mode="popLayout">
+          {cupons.map((cupom) => (
+            <motion.div
+              key={cupom.id_cupom}
+              layout
+              initial={{ opacity: 0, scale: 0.95 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0, scale: 0.9 }}
+              className="glass p-6 rounded-3xl border border-white/5 relative overflow-hidden group"
+            >
+              <div className="flex justify-between items-start mb-4">
+                <div className="w-12 h-12 rounded-2xl bg-blue-500/10 flex items-center justify-center text-blue-400">
+                  <Ticket className="w-6 h-6" />
+                </div>
+                <div className="flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                  <button
+                    onClick={() => { setEditData(cupom); setModalOpen(true); }}
+                    className="p-2 bg-white/5 hover:bg-blue-500/20 text-white/40 hover:text-blue-400 rounded-xl transition-all"
+                  >
+                    <Edit3 className="w-4 h-4" />
+                  </button>
+                  <button
+                    onClick={() => setConfirmDelete(cupom.id_cupom)}
+                    className="p-2 bg-white/5 hover:bg-red-500/20 text-white/40 hover:text-red-400 rounded-xl transition-all"
+                  >
+                    <Trash2 className="w-4 h-4" />
+                  </button>
+                </div>
               </div>
+
               <div>
-                <h4 className="text-white font-bold text-lg">{c.codigo}</h4>
-                <p className="text-blue-400 text-sm font-bold">{c.tipo === 'FIXO' ? `R$ ${c.valor}` : `${c.valor}%`} OFF</p>
+                <h3 className="text-lg font-bold text-white mb-1">{cupom.titulo || cupom.codigo}</h3>
+                <p className="text-xs text-white/40 line-clamp-2 mb-2">{cupom.descricao || "Sem descrição"}</p>
+                
+                <div className="flex flex-wrap gap-3 mt-2">
+                  <div className="flex items-center gap-1.5 text-[10px] font-bold text-white/30 uppercase tracking-wider bg-white/5 px-2 py-1 rounded-lg">
+                    <Hash className="w-3 h-3" />
+                    {cupom.quantidade ? `${cupom.quantidade} UN` : "Ilimitado"}
+                  </div>
+                  {cupom.validade && (
+                    <div className="flex items-center gap-1.5 text-[10px] font-bold text-white/30 uppercase tracking-wider bg-white/5 px-2 py-1 rounded-lg">
+                      <Calendar className="w-3 h-3" />
+                      {new Date(cupom.validade).toLocaleString("pt-BR", {
+                        day: "2-digit",
+                        month: "2-digit",
+                        hour: "2-digit",
+                        minute: "2-digit"
+                      })}
+                    </div>
+                  )}
+                </div>
               </div>
-            </div>
-            <div className="flex items-center justify-between pt-4 border-t border-white/5">
-              <span className="text-[10px] text-white/40 uppercase tracking-widest">Ativo</span>
-              <button onClick={() => setConfirmDelete(c.id_cupom)} className="p-2 text-white/10 hover:text-red-400 transition-all">
-                <Trash2 className="w-5 h-5" />
-              </button>
-            </div>
-          </div>
-        ))}
+
+              <div className="flex items-center justify-between pt-4 border-t border-white/5">
+                <div className="flex flex-col">
+                  <span className="text-[10px] text-white/20 uppercase font-bold tracking-wider">Desconto</span>
+                  <span className="text-xl font-black text-blue-400">
+                    {(cupom.dominio?.nome === "Porcentagem" || cupom.tipo === "PERCENTUAL") ? `${cupom.desconto || cupom.valor}%` : `R$ ${cupom.desconto || cupom.valor}`}
+                  </span>
+                </div>
+                <div className="bg-white/5 px-3 py-1.5 rounded-full border border-white/5">
+                  <span className="text-[10px] font-bold text-white/60">{cupom.dominio?.nome || cupom.tipo}</span>
+                </div>
+              </div>
+
+              <div className="absolute -right-6 top-1/2 -translate-y-1/2 w-12 h-12 bg-[#0F172A] rounded-full border border-white/5" />
+              <div className="absolute -left-6 top-1/2 -translate-y-1/2 w-12 h-12 bg-[#0F172A] rounded-full border border-white/5" />
+            </motion.div>
+          ))}
+        </AnimatePresence>
       </div>
+
+      <ModalCupomSettings
+        open={modalOpen}
+        onClose={() => setModalOpen(false)}
+        onSave={() => { setModalOpen(false); fetchCupons(); }}
+        tipos={tiposCupom}
+        editData={editData}
+      />
 
       <ModalConfirm 
         open={!!confirmDelete} 
@@ -679,6 +835,216 @@ function CuponsSettings() {
         message="Tem certeza que deseja remover este cupom de desconto?"
       />
     </motion.div>
+  );
+}
+
+function ModalCupomSettings({ open, onClose, onSave, tipos, editData }: {
+  open: boolean;
+  onClose: () => void;
+  onSave: () => void;
+  tipos: any[];
+  editData: any | null;
+}) {
+  const [titulo, setTitulo] = useState("");
+  const [descricao, setDescricao] = useState("");
+  const [desconto, setDesconto] = useState("");
+  const [idTipo, setIdTipo] = useState("");
+  const [quantidade, setQuantidade] = useState("");
+  const [validade, setValidade] = useState("");
+  const [loading, setLoading] = useState(false);
+
+  useEffect(() => {
+    if (editData) {
+      setTitulo(editData.titulo || editData.codigo || "");
+      setDescricao(editData.descricao || "");
+      setDesconto((editData.desconto || editData.valor || "").toString());
+      setIdTipo(editData.tipo_cupom || "");
+      setQuantidade(editData.quantidade?.toString() || "");
+      setValidade(editData.validade ? new Date(editData.validade).toISOString().slice(0, 16) : "");
+    } else {
+      setTitulo("");
+      setDescricao("");
+      setDesconto("");
+      setIdTipo("");
+      setQuantidade("");
+      setValidade("");
+    }
+  }, [editData, open]);
+
+  const handleConfirm = async () => {
+    if (!titulo || !desconto || !idTipo) return toast.error("Preencha os campos obrigatórios");
+    
+    setLoading(true);
+    try {
+      const url = "/api/cupons";
+      const method = editData ? "PUT" : "POST";
+      const body = {
+        id: editData?.id_cupom,
+        titulo,
+        descricao,
+        desconto: Number(desconto),
+        idTipoCupom: idTipo,
+        quantidade: quantidade ? Number(quantidade) : null,
+        validade: validade ? new Date(validade).toISOString() : null
+      };
+
+      const res = await fetch(url, {
+        method,
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(body),
+      });
+
+      if (res.ok) {
+        toast.success(editData ? "Cupom atualizado!" : "Cupom criado!");
+        onSave();
+      } else {
+        const err = await res.json();
+        toast.error(err.error || "Erro ao salvar cupom");
+      }
+    } catch {
+      toast.error("Erro de conexão");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  if (!open) return null;
+
+  return (
+    <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-[200] flex items-center justify-center p-4 overflow-y-auto">
+      <motion.div
+        initial={{ opacity: 0, scale: 0.95 }}
+        animate={{ opacity: 1, scale: 1 }}
+        className="bg-[#0F172A] border border-white/10 rounded-[2rem] p-8 w-full max-w-lg shadow-2xl relative my-8"
+      >
+        <button onClick={onClose} className="absolute top-6 right-6 text-white/30 hover:text-white">
+          <X className="w-6 h-6" />
+        </button>
+
+        <div className="flex items-center gap-4 mb-8">
+          <div className="w-14 h-14 rounded-2xl bg-blue-600/20 flex items-center justify-center text-blue-500">
+            <Ticket className="w-8 h-8" />
+          </div>
+          <div>
+            <h2 className="text-2xl font-bold text-white">{editData ? "Editar Cupom" : "Novo Cupom"}</h2>
+            <p className="text-white/40 text-sm">Configure as regras do desconto.</p>
+          </div>
+        </div>
+
+        <div className="space-y-6">
+          <div className="grid grid-cols-1 md:grid-cols-12 gap-4">
+            {/* Título */}
+            <div className="md:col-span-12">
+              <label className="text-xs font-bold text-white/40 uppercase ml-1">Título do Cupom (Código)</label>
+              <input
+                type="text"
+                placeholder="Ex: BEMVINDO10"
+                value={titulo}
+                onChange={(e) => setTitulo(e.target.value.toUpperCase())}
+                className="w-full bg-white/5 border border-white/10 rounded-2xl py-4 px-6 text-white mt-2 focus:outline-none focus:ring-2 focus:ring-blue-500/50 transition-all"
+              />
+            </div>
+
+            {/* Descrição */}
+            <div className="md:col-span-12">
+              <label className="text-xs font-bold text-white/40 uppercase ml-1">Descrição</label>
+              <textarea
+                placeholder="Ex: Desconto para primeira compra"
+                value={descricao}
+                onChange={(e) => setDescricao(e.target.value)}
+                rows={2}
+                className="w-full bg-white/5 border border-white/10 rounded-2xl py-4 px-6 text-white mt-2 focus:outline-none focus:ring-2 focus:ring-blue-500/50 transition-all resize-none"
+              />
+            </div>
+
+            {/* Tipo de Desconto */}
+            <div className="md:col-span-6">
+              <label className="text-xs font-bold text-white/40 uppercase ml-1">Tipo de Desconto</label>
+              <div className="relative">
+                <select
+                  value={idTipo}
+                  onChange={(e) => setIdTipo(e.target.value)}
+                  className="w-full bg-white/5 border border-white/10 rounded-2xl py-4 px-6 text-white mt-2 focus:outline-none focus:ring-2 focus:ring-blue-500/50 appearance-none cursor-pointer pr-12"
+                >
+                  <option value="" className="bg-[#0F172A]">Selecione...</option>
+                  {tipos.map((t) => (
+                    <option key={t.id_dominio} value={t.id_dominio} className="bg-[#0F172A]">{t.nome}</option>
+                  ))}
+                </select>
+                <ChevronDown className="absolute right-4 top-1/2 -translate-y-1/2 mt-1 w-5 h-5 text-white/20 pointer-events-none" />
+              </div>
+            </div>
+
+            {/* Valor do Desconto */}
+            <div className="md:col-span-6">
+              <label className="text-xs font-bold text-white/40 uppercase ml-1">Valor do Desconto</label>
+              <div className="relative mt-2">
+                <div className="absolute left-6 top-1/2 -translate-y-1/2 text-white/40 font-bold">
+                  {tipos.find(t => t.id_dominio === idTipo)?.nome === "Porcentagem" ? <Percent className="w-4 h-4" /> : <DollarSign className="w-4 h-4" />}
+                </div>
+                <input
+                  type="number"
+                  placeholder="0,00"
+                  value={desconto}
+                  onChange={(e) => setDesconto(e.target.value)}
+                  className="w-full bg-white/5 border border-white/10 rounded-2xl py-4 pl-12 pr-6 text-white focus:outline-none focus:ring-2 focus:ring-blue-500/50 transition-all"
+                />
+              </div>
+            </div>
+
+            {/* Quantidade (4 colunas) */}
+            <div className="md:col-span-4">
+              <label className="text-xs font-bold text-white/40 uppercase ml-1">Qtd. Disponível</label>
+              <div className="relative mt-2">
+                <div className="absolute left-6 top-1/2 -translate-y-1/2 text-white/40 font-bold">
+                  <Hash className="w-4 h-4" />
+                </div>
+                <input
+                  type="number"
+                  placeholder="Ilimitado"
+                  value={quantidade}
+                  onChange={(e) => setQuantidade(e.target.value)}
+                  className="w-full bg-white/5 border border-white/10 rounded-2xl py-4 pl-12 pr-6 text-white focus:outline-none focus:ring-2 focus:ring-blue-500/50 transition-all"
+                />
+              </div>
+            </div>
+
+            {/* Validade (8 colunas) */}
+            <div className="md:col-span-8">
+              <label className="text-xs font-bold text-white/40 uppercase ml-1">Data/Hora de Validade</label>
+              <div className="relative mt-2">
+                <div className="absolute left-6 top-1/2 -translate-y-1/2 text-white/40 font-bold">
+                  <Calendar className="w-4 h-4" />
+                </div>
+                <input
+                  type="datetime-local"
+                  value={validade}
+                  onChange={(e) => setValidade(e.target.value)}
+                  className="w-full bg-white/5 border border-white/10 rounded-2xl py-4 pl-12 pr-6 text-white focus:outline-none focus:ring-2 focus:ring-blue-500/50 transition-all [color-scheme:dark]"
+                />
+              </div>
+            </div>
+          </div>
+
+          <div className="flex gap-4 pt-4">
+            <button
+              onClick={onClose}
+              className="flex-1 bg-white/5 hover:bg-white/10 text-white py-4 rounded-2xl font-bold transition-all text-sm md:text-base"
+            >
+              Cancelar
+            </button>
+            <button
+              onClick={handleConfirm}
+              disabled={loading}
+              className="flex-[2] bg-blue-600 hover:bg-blue-500 text-white py-4 rounded-2xl font-bold transition-all shadow-xl shadow-blue-600/20 flex items-center justify-center gap-2 text-sm md:text-base"
+            >
+              {loading ? <Loader2 className="w-5 h-5 animate-spin" /> : <CheckCircle2 className="w-5 h-5" />}
+              {editData ? "Salvar" : "Criar Cupom"}
+            </button>
+          </div>
+        </div>
+      </motion.div>
+    </div>
   );
 }
 

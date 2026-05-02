@@ -1,7 +1,15 @@
 import { BaseService } from "./BaseService";
 import { StorageService, StorageFolder } from "./StorageService";
+import { triggerRealtime } from "@/lib/pusher";
 
 export class CatalogoService extends BaseService {
+  private async notifyCatalogUpdate() {
+    try {
+      await triggerRealtime(`catalog-${this.tenantId}`, "catalog-updated", { timestamp: Date.now() });
+    } catch (err) {
+      console.error("Erro ao notificar atualização de catálogo:", err);
+    }
+  }
 
   // ═══════════════════════════════════════
   // CATEGORIAS
@@ -30,12 +38,14 @@ export class CatalogoService extends BaseService {
   }
 
   async createCategoria(nome: string) {
-    return await this.db.categoria.create({
+    const res = await this.db.categoria.create({
       data: {
         nome,
         estabelecimento: this.tenantId,
       }
     });
+    await this.notifyCatalogUpdate();
+    return res;
   }
 
   async updateCategoria(id: string, nome: string) {
@@ -44,10 +54,12 @@ export class CatalogoService extends BaseService {
     });
     if (!cat) throw new Error("Categoria não encontrada");
 
-    return await this.db.categoria.update({
+    const res = await this.db.categoria.update({
       where: { id_categoria: id },
       data: { nome }
     });
+    await this.notifyCatalogUpdate();
+    return res;
   }
 
   async deleteCategoria(id: string) {
@@ -64,6 +76,7 @@ export class CatalogoService extends BaseService {
     }
 
     await this.db.categoria.delete({ where: { id_categoria: id } });
+    await this.notifyCatalogUpdate();
     return { success: true };
   }
 
@@ -85,7 +98,7 @@ export class CatalogoService extends BaseService {
       if (url) fotoUrl = url;
     }
 
-    return await this.db.produto.create({
+    const res = await this.db.produto.create({
       data: {
         nome: data.nome,
         descricao: data.descricao,
@@ -95,6 +108,8 @@ export class CatalogoService extends BaseService {
         visibilidade: data.visibilidade ?? "delivery,mesa",
       }
     });
+    await this.notifyCatalogUpdate();
+    return res;
   }
 
   async updateProduto(id: string, data: {
@@ -118,7 +133,7 @@ export class CatalogoService extends BaseService {
       if (url) fotoUrl = url;
     }
 
-    return await this.db.produto.update({
+    const res = await this.db.produto.update({
       where: { id_produto: id },
       data: {
         nome: data.nome,
@@ -128,6 +143,8 @@ export class CatalogoService extends BaseService {
         visibilidade: data.visibilidade,
       }
     });
+    await this.notifyCatalogUpdate();
+    return res;
   }
 
   async deleteProduto(id: string) {
@@ -147,6 +164,7 @@ export class CatalogoService extends BaseService {
     }
 
     await this.db.produto.delete({ where: { id_produto: id } });
+    await this.notifyCatalogUpdate();
     return { success: true };
   }
 
@@ -160,7 +178,7 @@ export class CatalogoService extends BaseService {
     qtdMinima?: number;
     qtdMaxima?: number;
   }) {
-    return await this.db.complemento_tipo.create({
+    const res = await this.db.complemento_tipo.create({
       data: {
         nome: data.nome,
         produto: data.produtoId,
@@ -168,6 +186,8 @@ export class CatalogoService extends BaseService {
         quantidade_maxima: BigInt(data.qtdMaxima ?? 10),
       }
     });
+    await this.notifyCatalogUpdate();
+    return res;
   }
 
   async updateComplemento(id: string, data: {
@@ -175,7 +195,7 @@ export class CatalogoService extends BaseService {
     qtdMinima?: number;
     qtdMaxima?: number;
   }) {
-    return await this.db.complemento_tipo.update({
+    const res = await this.db.complemento_tipo.update({
       where: { id_complemento_tipo: id },
       data: {
         nome: data.nome,
@@ -183,6 +203,8 @@ export class CatalogoService extends BaseService {
         quantidade_maxima: data.qtdMaxima != null ? BigInt(data.qtdMaxima) : undefined,
       }
     });
+    await this.notifyCatalogUpdate();
+    return res;
   }
 
   async deleteComplemento(id: string) {
@@ -199,6 +221,7 @@ export class CatalogoService extends BaseService {
     }
 
     await this.db.complemento_tipo.delete({ where: { id_complemento_tipo: id } });
+    await this.notifyCatalogUpdate();
     return { success: true };
   }
 
@@ -212,7 +235,7 @@ export class CatalogoService extends BaseService {
     valor?: number;
     complementoTipoId: string;
   }) {
-    return await this.db.complemento_item.create({
+    const res = await this.db.complemento_item.create({
       data: {
         nome: data.nome,
         descricao: data.descricao,
@@ -220,6 +243,8 @@ export class CatalogoService extends BaseService {
         complemento_tipo: data.complementoTipoId,
       }
     });
+    await this.notifyCatalogUpdate();
+    return res;
   }
 
   async updateItem(id: string, data: {
@@ -227,7 +252,7 @@ export class CatalogoService extends BaseService {
     descricao?: string;
     valor?: number;
   }) {
-    return await this.db.complemento_item.update({
+    const res = await this.db.complemento_item.update({
       where: { id_complemento_item: id },
       data: {
         nome: data.nome,
@@ -235,10 +260,13 @@ export class CatalogoService extends BaseService {
         valor: data.valor,
       }
     });
+    await this.notifyCatalogUpdate();
+    return res;
   }
 
   async deleteItem(id: string) {
     await this.db.complemento_item.delete({ where: { id_complemento_item: id } });
+    await this.notifyCatalogUpdate();
     return { success: true };
   }
 }

@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
+import { triggerRealtime } from "@/lib/pusher";
 
 export async function GET(req: NextRequest) {
   try {
@@ -94,6 +95,14 @@ export async function PUT(req: NextRequest) {
       });
       
       console.log("✅ UPDATE CONCLUÍDO COM SUCESSO NO BANCO!");
+      
+      // Notificar catálogo em tempo real
+      try {
+        await triggerRealtime(`catalog-${tenantId}`, "catalog-updated", { timestamp: Date.now() });
+      } catch (pusherErr) {
+        console.error("Erro ao notificar Pusher:", pusherErr);
+      }
+
       const response = JSON.parse(JSON.stringify(atualizado, (key, value) =>
         typeof value === 'bigint' ? value.toString() : value
       ));
