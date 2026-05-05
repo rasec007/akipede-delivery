@@ -566,9 +566,8 @@ function HorariosSettings() {
         onClose={() => setConfirmDelete(null)} 
         onConfirm={() => {
           if (confirmDelete?.type === 'horario') handleDeleteHorario(confirmDelete.id);
-          if (confirmDelete?.type === 'pagamento') handleDeletePagamento(confirmDelete.id);
         }}
-        title={confirmDelete?.type === 'horario' ? "Excluir Horário?" : "Remover Pagamento?"}
+        title="Excluir Horário?"
         message="Esta ação não pode ser desfeita. Tem certeza que deseja continuar?"
       />
     </motion.div>
