@@ -2,6 +2,7 @@ import { prisma } from "@/lib/prisma";
 import { createAccessToken, createRefreshToken } from "@/lib/auth";
 import bcrypt from "bcrypt";
 import { StorageService, StorageFolder } from "./StorageService";
+import { NotificationService } from "./NotificationService";
 
 export class AuthService {
   /**
@@ -128,6 +129,15 @@ export class AuthService {
         data: { responsavel: newUser.id_usuario }
       });
     }
+    
+    // ENVIO DE CREDENCIAIS (Email + WhatsApp)
+    NotificationService.sendWelcomeCredentials(
+      data.nome,
+      data.email,
+      data.senhaPlana,
+      data.celular,
+      !!establishmentId
+    ).catch(err => console.error("Erro ao enviar credenciais de boas-vindas:", err));
 
     return newUser;
   }

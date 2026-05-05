@@ -87,4 +87,49 @@ export class OrderService extends BaseService {
 
     return order;
   }
+
+  /**
+   * Gera um número de pedido no formato AAAAMMDD + sequencial (Ex: 20260503001)
+   */
+  async generateOrderNumber() {
+    const now = new Date();
+    const yyyy = now.getFullYear();
+    const mm = String(now.getMonth() + 1).padStart(2, '0');
+    const dd = String(now.getDate()).padStart(2, '0');
+    const datePart = `${yyyy}${mm}${dd}`;
+
+    // Busca o último pedido do dia para este estabelecimento
+    // Precisamos de um filtro que cubra o dia inteiro (UTC ou local, aqui usamos o início do dia)
+    const startOfDay = new Date();
+    startOfDay.setHours(0, 0, 0, 0);
+    const endOfDay = new Date();
+    endOfDay.setHours(23, 59, 59, 999);
+
+    const lastOrder = await this.db.pedido.findFirst({
+      where: {
+        estabelecimento: this.tenantId,
+        recebido: {
+          gte: startOfDay,
+          lte: endOfDay
+        }
+      },
+      orderBy: { num: "desc" }
+    });
+
+    let nextSeq = 1;
+    if (lastOrder && lastOrder.num) {
+      const lastNumStr = lastOrder.num.toString();
+      // Se o número começar com a data de hoje, extraímos o sequencial final
+      if (lastNumStr.startsWith(datePart)) {
+        const seqStr = lastNumStr.slice(8);
+        nextSeq = parseInt(seqStr) + 1;
+      }
+    }
+
+    // Formata o sequencial com no mínimo 3 dígitos (001, 002...)
+    // Se ultrapassar 999, ele naturalmente cresce (1000, 1001...)
+    const sequentialPart = String(nextSeq).padStart(3, '0');
+    
+    return BigInt(`${datePart}${sequentialPart}`);
+  }
 }

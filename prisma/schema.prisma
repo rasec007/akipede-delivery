@@ -16,12 +16,12 @@ model alerta {
 
 model area_entrega {
   id_area_entrega                                               String           @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  nome                                                          String?
-  distancia_max                                                 Decimal?         @db.Decimal
   distancia_minima                                              Decimal?         @db.Decimal
-  valor_entrega                                                 Decimal?         @db.Decimal
-  tempo_entrega                                                 String?
   estabelecimento                                               String?          @db.Uuid
+  distancia_max                                                 Decimal?         @db.Decimal
+  nome                                                          String?
+  tempo_entrega                                                 String?
+  valor_entrega                                                 Decimal?         @db.Decimal
   estabelecimento_area_entrega_estabelecimentoToestabelecimento estabelecimento? @relation("area_entrega_estabelecimentoToestabelecimento", fields: [estabelecimento], references: [id_estabelecimento], onDelete: NoAction)
 }
 
@@ -177,12 +177,12 @@ model endereco {
   cidade                           String?
   uf                               String?
   cep                              String?
-  padrao                           Boolean?            @default(true)
   ponto_referencia                 String?
   vinculo                          String?
   nome                             String?
   latitude                         String?
   longitude                        String?
+  padrao                           Boolean?            @default(true)
   pedido_pedido_enderecoToendereco pedido[]            @relation("pedido_enderecoToendereco")
   usuario_enderecos                usuario_enderecos[]
 }
@@ -201,17 +201,17 @@ model estabelecimento {
   status_plano                                                                 String?                            @db.Uuid
   apelido                                                                      String?
   descricao                                                                    String?
-  pix_tipo                                                                     String?
-  pix_chave                                                                    String?
-  pix_nome                                                                     String?
   data_vencimento_plano                                                        DateTime?                          @db.Date
   plano                                                                        String?                            @db.Uuid
   responsavel                                                                  String?                            @db.Uuid
+  tipo_categoria                                                               String?
+  pix_chave                                                                    String?
+  pix_nome                                                                     String?
+  pix_tipo                                                                     String?
+  complemento                                                                  String?
   endereco                                                                     String?
   numero                                                                       String?
-  complemento                                                                  String?
   ponto_referencia                                                             String?
-  tipo_categoria                                                               String?
   alerta_alerta_estabelecimentoToestabelecimento                               alerta[]                           @relation("alerta_estabelecimentoToestabelecimento")
   area_entrega_area_entrega_estabelecimentoToestabelecimento                   area_entrega[]                     @relation("area_entrega_estabelecimentoToestabelecimento")
   aviso_aviso_estabelecimentoToestabelecimento                                 aviso[]                            @relation("aviso_estabelecimentoToestabelecimento")

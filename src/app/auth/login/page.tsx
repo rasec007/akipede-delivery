@@ -7,8 +7,8 @@ import { motion } from "framer-motion";
 import { toast } from "react-hot-toast";
 
 export default function LoginPage() {
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
+  const [email, setEmail] = useState("rasec007+delivery@gmail.com");
+  const [password, setPassword] = useState("Rasec007k9.,.,");
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
@@ -89,7 +89,7 @@ export default function LoginPage() {
             </div>
             <div>
               <h1 className="text-3xl font-black text-white tracking-tight">Akipede - Delivery</h1>
-              <p className="text-white/40 text-sm mt-1">
+              <p className="text-[#9CA3AF] text-sm mt-1">
                 {isFromCheckout ? 'Faça login para finalizar seu pedido' : 'Entre na sua conta para gerenciar seu delivery'}
               </p>
             </div>
@@ -164,10 +164,28 @@ export default function LoginPage() {
               )}
             </button>
           </form>
+          
+          {/* Dados de Acesso Temporário */}
+          <div className="mt-8 pt-6 border-t border-white/5">
+            <div className="bg-blue-500/5 border border-blue-500/10 rounded-2xl p-4">
+              <p className="text-[10px] font-black text-blue-400 uppercase tracking-widest mb-2 opacity-50 text-center">Acesso Rápido (Temporário)</p>
+              <div className="space-y-2">
+                <div className="flex justify-between items-center bg-white/5 p-2 rounded-lg border border-white/5">
+                  <span className="text-[10px] text-white/30 uppercase font-bold">Email</span>
+                  <span className="text-xs text-white/70 font-medium select-all">rasec007+delivery@gmail.com</span>
+                </div>
+                <div className="flex justify-between items-center bg-white/5 p-2 rounded-lg border border-white/5">
+                  <span className="text-[10px] text-white/30 uppercase font-bold">Senha</span>
+                  <span className="text-xs text-white/70 font-medium select-all">Rasec007k9.,.,</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
 
           <div className="mt-10 text-center space-y-4">
             <p className="text-white/40 text-xs font-medium">
-              Não tem uma conta? <a href={`/auth/register${callbackUrl ? `?callbackUrl=${encodeURIComponent(callbackUrl)}` : ''}`} className="text-blue-400 font-bold hover:underline ml-1">Cadastre-se</a>
+              Não tem uma conta? <a href={`/auth/register${callbackUrl ? `?callbackUrl=${encodeURIComponent(callbackUrl)}` : ''}`} className="text-blue-400 font-bold hover:underline ml-1">NÃO TENHO CONTA</a>
             </p>
             {isFromCheckout && (
               <button 

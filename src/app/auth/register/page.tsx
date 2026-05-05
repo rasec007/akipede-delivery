@@ -45,8 +45,19 @@ export default function RegisterPage() {
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || "Erro ao cadastrar");
 
-      toast.success("Cadastro realizado! Faça login para continuar.");
-      router.push(`/auth/login${callbackUrl ? `?callbackUrl=${encodeURIComponent(callbackUrl)}` : ""}`);
+      // AUTO-LOGIN: Salva o token e redireciona
+      if (data.accessToken) {
+        localStorage.setItem("accessToken", data.accessToken);
+        document.cookie = `accessToken=${data.accessToken}; path=/; max-age=${60 * 60 * 24 * 7}; SameSite=Lax`;
+      }
+
+      toast.success("Bem-vindo! Seu cadastro foi realizado com sucesso.");
+      
+      if (callbackUrl) {
+        router.push(callbackUrl);
+      } else {
+        router.push("/dashboard");
+      }
     } catch (err: any) {
       setError(err.message);
     } finally {

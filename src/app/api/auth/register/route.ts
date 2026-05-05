@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { AuthService } from "@/server/services/AuthService";
 import { NotificationService } from "@/server/services/NotificationService";
+import { createAccessToken, createRefreshToken } from "@/lib/auth";
 
 export async function POST(req: Request) {
   try {
@@ -38,9 +39,21 @@ export async function POST(req: Request) {
       console.error("Erro ao enviar notificações de boas-vindas:", err);
     });
 
+    // AUTO-LOGIN: Gera os tokens imediatamente após o cadastro
+    const payload = {
+      userId: newUser.id_usuario,
+      tenantId: newUser.estabelecimento || "",
+      role: newUser.adm ? "ADMIN" : "OPERATOR",
+    };
+
+    const accessToken = await createAccessToken(payload);
+    const refreshToken = await createRefreshToken(payload);
+
     return NextResponse.json({ 
       message: "Usuário cadastrado com sucesso",
-      userId: newUser.id_usuario 
+      userId: newUser.id_usuario,
+      accessToken,
+      refreshToken
     }, { status: 201 });
     
   } catch (error: any) {

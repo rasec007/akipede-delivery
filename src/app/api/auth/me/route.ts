@@ -25,18 +25,25 @@ export async function GET() {
         id_usuario: true,
         nome: true,
         email: true,
-        endereco_endereco_vinculoTousuario: {
-          where: { deletado: false },
+        estabelecimento: true,
+        usuario_enderecos: {
           select: {
-            id_endereco: true,
-            lograduro: true,
-            num: true,
-            complemento: true,
-            ponto_referencia: true,
-            latitude: true,
-            longitude: true,
-            padrao: true,
-            tipo: true
+            endereco: {
+              select: {
+                id_endereco: true,
+                lograduro: true,
+                num: true,
+                complemento: true,
+                bairro: true,
+                cidade: true,
+                uf: true,
+                ponto_referencia: true,
+                nome: true,
+                latitude: true,
+                longitude: true,
+                padrao: true
+              }
+            }
           }
         }
       }
@@ -52,10 +59,15 @@ export async function GET() {
         id: user.id_usuario,
         nome: user.nome,
         email: user.email,
-        enderecos: user.endereco_endereco_vinculoTousuario
+        tenantId: user.estabelecimento,
+        enderecos: user.usuario_enderecos.map(ue => ({
+          ...ue.endereco,
+          tipo: ue.endereco.nome // Mapeia nome (Casa/Trabalho) para tipo
+        }))
       }
     });
   } catch (error) {
-    return NextResponse.json({ authenticated: false }, { status: 500 });
+    console.error("Erro em /api/auth/me:", error);
+    return NextResponse.json({ authenticated: false, error: "Internal Server Error" }, { status: 500 });
   }
 }

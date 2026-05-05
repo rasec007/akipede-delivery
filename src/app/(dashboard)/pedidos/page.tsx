@@ -3,7 +3,8 @@
 import React, { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
-import { ShoppingBag, Clock, CheckCircle2, Truck, XCircle, Search, MapPin } from "lucide-react";
+import { ShoppingBasket, Clock, CheckCircle2, Truck, XCircle, Search, MapPin, Bell } from "lucide-react";
+import { toast } from "react-hot-toast";
 import { useRealtime } from "@/client/hooks/useRealtime";
 
 // Tipos baseados no Schema
@@ -21,7 +22,7 @@ type Order = {
 const statusTabs = [
   { id: "PENDING", label: "Pendentes", icon: Clock, color: "text-yellow-400" },
   { id: "CONFIRMED", label: "Confirmados", icon: CheckCircle2, color: "text-blue-400" },
-  { id: "PREPARING", label: "Em Preparo", icon: ShoppingBag, color: "text-purple-400" },
+  { id: "PREPARING", label: "Em Preparo", icon: ShoppingBasket, color: "text-purple-400" },
   { id: "DELIVERING", label: "Em Entrega", icon: Truck, color: "text-orange-400" },
   { id: "COMPLETED", label: "Finalizados", icon: CheckCircle2, color: "text-green-400" },
 ];
@@ -31,17 +32,27 @@ export default function PedidosPage() {
   const [orders, setOrders] = useState<Order[]>([]);
   const [activeStatus, setActiveStatus] = useState("PENDING");
   const [loading, setLoading] = useState(true);
+  const [tenantId, setTenantId] = useState<string>("");
 
-  // Tenant ID Mockado para teste (Em produção viria do context/auth)
-  const tenantId = "mock-tenant-id"; 
+  // Busca sessão para pegar o tenantId real
+  useEffect(() => {
+    fetch("/api/auth/me")
+      .then(res => res.json())
+      .then(data => {
+        if (data.user?.tenantId) {
+          setTenantId(data.user.tenantId);
+        }
+      });
+  }, []);
 
   // Escuta atualizações em tempo real
-  useRealtime(tenantId, "order_updated", (updatedOrder) => {
+  useRealtime(tenantId ? `orders-${tenantId}` : "", "order_updated", (updatedOrder) => {
     setOrders(prev => Array.isArray(prev) ? prev.map(o => o.id_pedido === updatedOrder.id_pedido ? updatedOrder : o) : []);
   });
 
-  useRealtime(tenantId, "order_new", (newOrder) => {
+  useRealtime(tenantId ? `orders-${tenantId}` : "", "order_new", (newOrder) => {
     setOrders(prev => Array.isArray(prev) ? [newOrder, ...prev] : [newOrder]);
+    toast.success("Novo pedido recebido!", { icon: '🔔' });
   });
 
   useEffect(() => {
@@ -75,7 +86,7 @@ export default function PedidosPage() {
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
         <div>
           <h2 className="text-3xl font-bold text-white">Gestão de Pedidos</h2>
-          <p className="text-white/40">Gerencie e acompanhe as entregas em tempo real.</p>
+          <p className="text-[#9CA3AF]">Gerencie e acompanhe as entregas em tempo real.</p>
         </div>
         <div className="relative w-full md:w-64">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-white/20" />
@@ -113,8 +124,8 @@ export default function PedidosPage() {
             <p className="text-white/20 col-span-full text-center py-20">Carregando pedidos...</p>
           ) : orders.length === 0 ? (
             <div className="col-span-full flex flex-col items-center justify-center py-20 glass rounded-3xl border-2 border-dashed border-white/5">
-               <ShoppingBag className="w-12 h-12 text-white/10 mb-4" />
-               <p className="text-white/20">Nenhum pedido encontrado nesta categoria.</p>
+               <ShoppingBasket className="w-12 h-12 text-[#9CA3AF]/20 mb-4" />
+               <p className="text-[#9CA3AF]">Nenhum pedido encontrado nesta categoria.</p>
             </div>
           ) : (
             orders.map((order) => (

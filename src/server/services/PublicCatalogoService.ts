@@ -18,6 +18,34 @@ export class PublicCatalogoService {
         logo: true,
         descricao: true,
         celular: true,
+        endereco: true,
+        numero: true,
+        ponto_referencia: true,
+        pix_chave: true,
+        pix_nome: true,
+        pix_tipo: true,
+        area_entrega_area_entrega_estabelecimentoToestabelecimento: {
+          select: {
+            id_area_entrega: true,
+            nome: true,
+            distancia_minima: true,
+            distancia_max: true,
+            valor_entrega: true,
+            tempo_entrega: true
+          }
+        },
+        lista_forma_pagamento_lista_forma_pagamento_estabelecimentoToestabelecimento: {
+          select: {
+            id_lista_forma_pagamento: true,
+            dominio: {
+              select: {
+                id_dominio: true,
+                nome: true,
+                codigo: true
+              }
+            }
+          }
+        }
       }
     });
     return est;
