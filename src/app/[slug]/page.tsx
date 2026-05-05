@@ -168,7 +168,7 @@ export default function CatalogoPage({ params }: { params: { slug: string } }) {
           if (filteredProducts.length === 0) return null;
 
           return (
-            <div key={cat.id_categoria} ref={el => categoryRefs.current[cat.id_categoria] = el} className="scroll-mt-32">
+            <div key={cat.id_categoria} ref={(el) => { categoryRefs.current[cat.id_categoria] = el; }} className="scroll-mt-32">
               <h3 className="text-lg font-bold mb-4 flex items-center gap-2">
                 <div className="w-1 h-5 bg-blue-600 rounded-full" />
                 {cat.nome}
