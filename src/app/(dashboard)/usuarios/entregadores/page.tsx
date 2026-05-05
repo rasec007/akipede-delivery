@@ -16,6 +16,7 @@ type Entregador = {
   celular?: string;
   email?: string;
   apelido?: string;
+  foto?: string;
 };
 
 export default function EntregadoresPage() {
