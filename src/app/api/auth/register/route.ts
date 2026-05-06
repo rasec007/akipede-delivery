@@ -1,3 +1,4 @@
+export const dynamic = 'force-dynamic';
 import { NextResponse } from "next/server";
 import { AuthService } from "@/server/services/AuthService";
 import { NotificationService } from "@/server/services/NotificationService";

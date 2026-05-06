@@ -1,12 +1,12 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Mail, Lock, Loader2, ArrowRight, Eye, EyeOff, ShoppingBag, ArrowLeft } from "lucide-react";
 import { motion } from "framer-motion";
 import { toast } from "react-hot-toast";
 
-export default function LoginPage() {
+function LoginContent() {
   const [email, setEmail] = useState("rasec007+delivery@gmail.com");
   const [password, setPassword] = useState("Rasec007k9.,.,");
   const [showPassword, setShowPassword] = useState(false);
@@ -199,5 +199,13 @@ export default function LoginPage() {
         </div>
       </motion.div>
     </main>
+  );
+}
+
+export default function LoginPage() {
+  return (
+    <Suspense fallback={<div className="min-h-screen bg-[#0F172A] flex items-center justify-center"><Loader2 className="w-8 h-8 text-blue-500 animate-spin" /></div>}>
+      <LoginContent />
+    </Suspense>
   );
 }

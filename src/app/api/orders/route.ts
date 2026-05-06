@@ -1,3 +1,4 @@
+export const dynamic = 'force-dynamic';
 import { NextResponse } from "next/server";
 import { OrderService } from "@/server/services/OrderService";
 import { getAuthContext } from "@/lib/api-helpers";
