@@ -17,7 +17,7 @@ export async function POST(req: Request) {
     // Configura o Refresh Token em um Cookie HttpOnly para segurança (Anti-XSS)
     const response = NextResponse.json({ 
       accessToken, 
-      user: { nome: user.nome, email: user.email } 
+      user: { nome: user.name, email: user.email } 
     });
 
     // Salva o Refresh Token em um cookie seguro

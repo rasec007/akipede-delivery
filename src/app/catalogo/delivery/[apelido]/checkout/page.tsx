@@ -10,6 +10,12 @@ import { useRealtime } from "@/client/hooks/useRealtime";
 import { useCallback } from "react";
 import Cookies from "js-cookie";
 
+declare global {
+  interface Window {
+    google: any;
+  }
+}
+
 export default function CheckoutPage() {
   const params = useParams();
   const router = useRouter();
